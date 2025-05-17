@@ -7,33 +7,29 @@ $ip_client = $_SERVER["REMOTE_ADDR"]; //Adresse IP du client effectuant la requ�
 $limit = 1;		//Nombre de connexions autorisé par $minutes. (vous pouvez le modifier)
 $minutes = 1;	//Nombre de $minutes pour la vérification. (vous pouvez le modifier)
 
-
-
-
-
 //**********Implémenter votre logique ICI*************/
 
 
-$fichierIp = fopen("adresses.txt", "r");
 
-if(!$fichierIp)
-{	
-	fopen("adresses.txt", "w");
+$conn = new mysqli("localhost", "root", "", "ddos");
+echo $ip_client;
+$stmt = $conn->prepare("SELECT * FROM visitor WHERE ipAddress = ?");
+$stmt->bind_param("s", $ip_client);
+
+$stmt->execute();
+
+
+if($stmt->fetch())
+{			
+	echo "Un resultat a été trouvé";
 }
-
-$fileLines = file("adresses.txt");
-
-echo($fileLines);
-
-for($i = 0; $i < count($fileLines); $i++)
+else
 {
-	echo($fileLines[$i]);
+	echo "Aucun resultat trouve";
 }
+
 
 //TODO METTRE VOTRE CODE
-
-
-
 
 //****************************************************/
 
