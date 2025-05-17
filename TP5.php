@@ -16,12 +16,19 @@ $minutes = 1;	//Nombre de $minutes pour la vérification. (vous pouvez le modifi
 
 $fichierIp = fopen("adresses.txt", "r");
 
-if($!file)
+if(!$fichierIp)
 {	
-	$fichierIp = fopen("adresses.txt", "w");
+	fopen("adresses.txt", "w");
 }
 
+$fileLines = file("adresses.txt");
 
+echo($fileLines);
+
+for($i = 0; $i < count($fileLines); $i++)
+{
+	echo($fileLines[$i]);
+}
 
 //TODO METTRE VOTRE CODE
 
