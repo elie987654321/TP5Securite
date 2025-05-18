@@ -4,15 +4,12 @@ session_start();
 
 $acces = true;
 $ip_client = $_SERVER["REMOTE_ADDR"]; //Adresse IP du client effectuant la requête.
-$limit = 1;		//Nombre de connexions autorisé par $minutes. (vous pouvez le modifier)
+$limit = 3;		//Nombre de connexions autorisé par $minutes. (vous pouvez le modifier)
 $minutes = 1;	//Nombre de $minutes pour la vérification. (vous pouvez le modifier)
 
 //**********Implémenter votre logique ICI*************/
 
-
-
 $conn = new mysqli("localhost", "root", "", "ddos");
-echo $ip_client;
 $sql = "SELECT * FROM visitor WHERE ipAddress = \"" . $ip_client . "\"";
 $result = $conn->query($sql);
 
@@ -22,52 +19,50 @@ if($row)
 {		
 	if(isset($row['lastUpdate']))
 	{
-		echo $row['lastUpdate'];
-		echo gettype($row['lastUpdate']);
-		$timeStamp = strtotime($row["lastUpdate"]);
-		$secondsSinceLastUpdate = time() - $timeStamp ;
+		
+		$secondsSinceLastUpdate = time() - $row['lastUpdate']  ;
+		echo $secondsSinceLastUpdate;
 		if($secondsSinceLastUpdate < $minutes * 60)
 		{
 			
-			$stmt = $conn->prepare("UPDATE visitor SET connSinceLastUpdate = ? WHERE id = ?");
-			
-			$newCount = $row['connSinceLastUpdate'] + 1;
-			$stmt->bind_param("ii", $newCount, $row["id"]);
+			if($row["connSinceLastUpdate"] < $limit)
+			{
+				$stmt = $conn->prepare("UPDATE visitor SET connSinceLastUpdate = ? WHERE id = ?");
+				
+				$newCount = $row['connSinceLastUpdate'] + 1;
+				$stmt->bind_param("ii", $newCount, $row["id"]);
 
+				$stmt->execute();
+				$acces = true;
+			}
+			else
+			{
+				$acces = false;
+			}
+		}
+		else
+		{
+			$stmt = $conn->prepare("UPDATE visitor SET lastUpdate = ?, connSinceLastUpdate = ? WHERE id = ?");
+			$now  = time();
+			$un = 1;
+			$stmt->bind_param("sii", $now , $un, $row["id"]);
 			$stmt->execute();
+			$acces = true;
 		}
 	}
 }
-
-/*
-if(empty($row))
+else
 {
-	echo "Entré bd trouve";
-	/*if(isset($row['id']))
-	{
-		echo "bonjour";
-		echo $row['id'];
-	}
-	else
-	{
-		echo "Pas de derniere update";
-	}
-}*/
+	
+	$stmt = $conn->prepare("INSERT INTO visitor (ipAddress , lastUpdate, connSinceLastUpdate) VALUES (?,?,?)");
+	
+	$now = time();
+	$un = 1;
+	$stmt->bind_param("sii", $ip_client, time(), $un);
 
-	/*if(isset($data['lastUpdate']))
-	{
-		echo "Derniere update :" . $data['lastUpdate'];
-	}
-	else
-	{
-		echo "Pas de derniere update";
-	}*/
-
-
-//TODO METTRE VOTRE CODE
-
-//****************************************************/
-
+	$stmt->execute();
+	$acces = true;
+}
 
 
 
