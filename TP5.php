@@ -13,24 +13,46 @@ $minutes = 1;	//Nombre de $minutes pour la vérification. (vous pouvez le modifi
 
 $conn = new mysqli("localhost", "root", "", "ddos");
 echo $ip_client;
-$stmt = $conn->prepare("SELECT * FROM visitor WHERE ipAddress = ?");
-$stmt->bind_param("s", $ip_client);
-
-$stmt->execute();
-
-$result = $stmt->get_result();
+$sql = "SELECT * FROM visitor WHERE ipAddress = \"" . $ip_client . "\"";
+$result = $conn->query($sql);
 
 $row = $result->fetch_assoc();
 
-echo "Resultat trouve";
-
-if(isset($row))
-{
-	if(isset($row["lastUpdate"]))
+if($row)
+{		
+	if(isset($row['lastUpdate']))
 	{
-		
+		echo $row['lastUpdate'];
+		echo gettype($row['lastUpdate']);
+		$timeStamp = strtotime($row["lastUpdate"]);
+		$secondsSinceLastUpdate = time() - $timeStamp ;
+		if($secondsSinceLastUpdate < $minutes * 60)
+		{
+			
+			$stmt = $conn->prepare("UPDATE visitor SET connSinceLastUpdate = ? WHERE id = ?");
+			
+			$newCount = $row['connSinceLastUpdate'] + 1;
+			$stmt->bind_param("ii", $newCount, $row["id"]);
+
+			$stmt->execute();
+		}
 	}
 }
+
+/*
+if(empty($row))
+{
+	echo "Entré bd trouve";
+	/*if(isset($row['id']))
+	{
+		echo "bonjour";
+		echo $row['id'];
+	}
+	else
+	{
+		echo "Pas de derniere update";
+	}
+}*/
 
 	/*if(isset($data['lastUpdate']))
 	{
