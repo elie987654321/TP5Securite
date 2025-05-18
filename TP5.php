@@ -18,15 +18,28 @@ $stmt->bind_param("s", $ip_client);
 
 $stmt->execute();
 
+$result = $stmt->get_result();
 
-if($stmt->fetch())
-{			
-	echo "Un resultat a été trouvé";
-}
-else
+$row = $result->fetch_assoc();
+
+echo "Resultat trouve";
+
+if(isset($row))
 {
-	echo "Aucun resultat trouve";
+	if(isset($row["lastUpdate"]))
+	{
+		
+	}
 }
+
+	/*if(isset($data['lastUpdate']))
+	{
+		echo "Derniere update :" . $data['lastUpdate'];
+	}
+	else
+	{
+		echo "Pas de derniere update";
+	}*/
 
 
 //TODO METTRE VOTRE CODE
